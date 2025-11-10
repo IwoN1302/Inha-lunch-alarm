@@ -1,3 +1,5 @@
+import requests
+import json
 import ssl
 import urllib3
 from bs4 import BeautifulSoup
