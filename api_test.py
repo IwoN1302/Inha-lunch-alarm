@@ -3,7 +3,6 @@ import ssl
 from requests.adapters import HTTPAdapter
 from urllib3.poolmanager import PoolManager
 from urllib3.util import ssl_
-from json_cleaning_function import *
 import json
 # 1️⃣ SECLEVEL=1을 적용하는 커스텀 어댑터 정의
 class SSLAdapter(HTTPAdapter):
@@ -46,8 +45,3 @@ print("Status:", response.status_code)
 data= json.loads(response.text)
 
 print("json.loads 데이터 타입:", type(data))
-print()
-test=find_by_date("20251110", data)
-print(test)
-
-print(test["lunchNormal"])
