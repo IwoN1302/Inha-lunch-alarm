@@ -1,38 +1,71 @@
 import requests
-import ssl
 from requests.adapters import HTTPAdapter
-from urllib3 import poolmanager # <<< [수정] 이 라인이 누락되었습니다.
+from urllib3.util import ssl_
+import json
+import datetime
 
-# --- [수정된 부분 시작] ---
-# TLS 1.2 이상만 사용하도록 강제하는 '연결 규칙(Adapter)' 클래스를 정의합니다.
-class TLSv1_2Adapter(HTTPAdapter):
-    def init_poolmanager(self, connections, maxsize, block=False):
-        # 'poolmanager'를 여기서 사용합니다.
-        self.poolmanager = poolmanager.PoolManager(
-            num_pools=connections,
-            maxsize=maxsize,
-            block=block,
-            ssl_version=ssl.PROTOCOL_TLSv1_2, # 이 부분이 핵심
-        )
+def find_by_date(date, json_data):
+    for data in json_data:
+        if data["date"] == date:
+            return data
+    return "Error: No data matched with date"
 
-# Session 객체를 만들어서 위에서 정의한 연결 규칙을 적용합니다.
+
+# 1️⃣ SECLEVEL=1을 적용하는 커스텀 어댑터 정의
+class SSLAdapter(HTTPAdapter):
+    def __init__(self, *args, **kwargs):
+        self.ssl_context = ssl_.create_urllib3_context()
+        self.ssl_context.set_ciphers('DEFAULT:@SECLEVEL=1')
+        super().__init__(*args, **kwargs)
+
+    def init_poolmanager(self, *args, **kwargs):
+        kwargs['ssl_context'] = self.ssl_context
+        return super().init_poolmanager(*args, **kwargs)
+
+# 2️⃣ 세션 생성 및 어댑터 등록
 session = requests.Session()
-session.mount('https://', TLSv1_2Adapter()) # 모든 https:// 접속에 이 규칙을 적용
-# --- [수정된 부분 끝] ---
+session.mount("https://", SSLAdapter())
 
-# 이제 requests.get() 대신 session.get()을 사용합니다.
-url = "https://www.inhatc.ac.kr/kr/485/subview.do" # 테스트할 URL
+# 3️⃣ 요청 설정
+url = "https://www.inhatc.ac.kr/haksa/kr/getHaksaFoodMenuList.do"
+today = datetime.date.today()
+start_of_week = today - datetime.timedelta(days=(today.weekday()+1) % 7)
+end_of_week = start_of_week + datetime.timedelta(days=6)
 
-try:
-    response = session.get(url, verify=False) # 수정된 코드로 접속 시도
+payload = {
+    "gubun": "학생",
+    "strDate": start_of_week.strftime("%Y%m%d"),
+    "endDate": end_of_week.strftime("%Y%m%d")
+}
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                  "AppleWebKit/537.36 (KHTML, like Gecko) "
+                  "Chrome/140.0.0.0 Whale/4.34.340.19 Safari/537.36",
+    "Referer": "https://www.inhatc.ac.kr/kr/485/subview.do",
+    "Origin": "https://www.inhatc.ac.kr",
+    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    "X-Requested-With": "XMLHttpRequest"
+}
 
-    if response.status_code == 200:
-        print("접속 성공! SSL/TLS 문제가 해결되었습니다.")
-        # 여기에 BeautifulSoup을 이용한 파싱 코드를 이어서 작성하면 됩니다.
-    else:
-        print(f"접속은 되었으나 상태 코드가 다릅니다: {response.status_code}")
+# 4️⃣ POST 요청
+response = session.post(url, data=payload, headers=headers)
 
-except requests.exceptions.SSLError as e:
-    print(f"여전히 SSL 에러가 발생합니다: {e}")
-except Exception as e:
-    print(f"다른 에러가 발생했습니다: {e}")
+# 5️⃣ 결과 출력
+print("Status:", response.status_code)
+# print(response.text)
+data= json.loads(response.text)
+print()
+print("json.loads 데이터 타입:", type(data))
+print(data)
+print()
+
+
+print(today)
+test=find_by_date(today.strftime("%Y%m%d"), data)
+print(test)
+print("=====<한식>=====")
+print(test["lunchNormal"])
+
+print("=====<일품>=====")
+print(test["lunchSpecial"])
+print()
