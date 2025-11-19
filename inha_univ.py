@@ -5,7 +5,6 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 
 def get_inha_uni_lunch_final():
-    print("--- 인하대 학생식당 [중식] 정밀 추출 ---")
 
     # 1. 오늘 날짜 검색어 (예: 11.19.)
     now = datetime.now()
@@ -88,4 +87,5 @@ def get_inha_uni_lunch_final():
         driver.quit()
 
 if __name__ == "__main__":
+    print("--- 인하대 학생식당 [중식] 정밀 추출 ---")
     print(get_inha_uni_lunch_final())
