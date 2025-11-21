@@ -60,7 +60,7 @@ def get_inhatc_lunch_menu():
     result+="================================\n"
     result+=f"[한식] 5500원\n"
     result+=today_menu["lunchNormal"]
-    result+="--------------------------------\n"
+    result+="\n--------------------------------\n"
     result+=f"[일품] 6500원\n"
     result+=today_menu["lunchSpecial"]
     result+="\n--------------------------------\n"
