@@ -56,8 +56,10 @@ def get_inhatc_lunch_menu():
     }
 
     # 4️⃣ POST 요청 (SSL 검증 비활성화)
-    response = session.post(url, data=payload, headers=headers, verify=False)
-
+    try:
+        response = session.post(url, data=payload, headers=headers, verify=False)
+    except Exception as e:
+        return f"Error: 메뉴 데이터를 추출하지 못 했음 {e}"
     # 5️⃣ 결과 출력
     print("Status:", response.status_code)
     # print(response.text)
