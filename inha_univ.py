@@ -24,7 +24,7 @@ def get_inha_uni_lunch_final():
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-gpu")
     options.add_argument("--headless")
-
+    # options.binary_location = "/usr/bin/google-chrome"
     driver = webdriver.Chrome(options=options)
     
     driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {
