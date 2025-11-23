@@ -1,4 +1,5 @@
 import time
+import os
 from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -24,7 +25,30 @@ def get_inha_uni_lunch_final():
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-gpu")
     options.add_argument("--headless")
-    # options.binary_location = "/usr/bin/google-chrome"
+    options.add_argument("--disable-dev-shm-usage")  # Linux 서버에서 메모리 부족 방지
+    
+    # Linux 서버에서 Chrome/Chromium 경로 자동 탐지
+    chrome_paths = [
+        "/usr/bin/google-chrome",
+        "/usr/bin/google-chrome-stable",
+        "/usr/bin/chromium",
+        "/usr/bin/chromium-browser",
+        "/snap/bin/chromium",
+        "/usr/bin/chrome",
+    ]
+    
+    chrome_binary = None
+    for path in chrome_paths:
+        if os.path.exists(path) and os.access(path, os.X_OK):
+            chrome_binary = path
+            break
+    
+    if chrome_binary:
+        options.binary_location = chrome_binary
+        print(f"Chrome binary found: {chrome_binary}")
+    else:
+        print("Warning: Chrome binary not found in common paths. Trying default...")
+    
     driver = webdriver.Chrome(options=options)
     
     driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {
