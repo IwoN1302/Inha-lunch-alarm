@@ -3,6 +3,8 @@ from requests.adapters import HTTPAdapter
 from urllib3.util import ssl_
 import json
 import datetime
+import urllib3
+import ssl
 
 def find_by_date(date, json_data):
     for data in json_data:
@@ -16,6 +18,8 @@ class SSLAdapter(HTTPAdapter):
     def __init__(self, *args, **kwargs):
         self.ssl_context = ssl_.create_urllib3_context()
         self.ssl_context.set_ciphers('DEFAULT:@SECLEVEL=1')
+        self.ssl_context.check_hostname = False
+        self.ssl_context.verify_mode = ssl.CERT_NONE
         super().__init__(*args, **kwargs)
 
     def init_poolmanager(self, *args, **kwargs):
@@ -23,6 +27,9 @@ class SSLAdapter(HTTPAdapter):
         return super().init_poolmanager(*args, **kwargs)
 
 def get_inhatc_lunch_menu():
+    # SSL 경고 비활성화 (자체 서명 인증서 사용 사이트 대응)
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+    
     # 2️⃣ 세션 생성 및 어댑터 등록
     session = requests.Session()
     session.mount("https://", SSLAdapter())
@@ -48,8 +55,8 @@ def get_inhatc_lunch_menu():
         "X-Requested-With": "XMLHttpRequest"
     }
 
-    # 4️⃣ POST 요청
-    response = session.post(url, data=payload, headers=headers)
+    # 4️⃣ POST 요청 (SSL 검증 비활성화)
+    response = session.post(url, data=payload, headers=headers, verify=False)
 
     # 5️⃣ 결과 출력
     print("Status:", response.status_code)
