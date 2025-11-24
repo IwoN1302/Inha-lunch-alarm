@@ -66,7 +66,7 @@ def get_inhatc_lunch_menu():
     data= json.loads(response.text)
     today_menu=find_by_date(today.strftime("%Y%m%d"), data)
     result=f"2️⃣  [인하공전 학생식당 중식] ({today.strftime("%m.%d.")})\n"
-    result+="================================\n"
+    result+="=================================\n"
     result+=f"[한식] 5500원\n"
     result+=str(today_menu["lunchNormal"])
     result+="\n--------------------------------\n"

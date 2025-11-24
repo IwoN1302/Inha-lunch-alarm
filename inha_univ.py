@@ -54,7 +54,7 @@ def get_inha_uni_lunch_final():
             rows = target_table.find_elements(By.CSS_SELECTOR, "tbody tr")
             
             result_text = f"1️⃣  [인하대 학생식당 중식] ({today_str})\n"
-            result_text += "================================\n"
+            result_text += "=================================\n"
 
             for row in rows:
                 try:
@@ -65,7 +65,7 @@ def get_inha_uni_lunch_final():
 
                     result_text += f"[{corner}] {price}원\n"
                     result_text += f"{menu_content}\n"
-                    result_text += "--------------------------------\n"
+                    result_text += "---------------------------------\n"
                 except Exception:
                     # 개별 행 처리 실패 시 건너뛰기
                     continue
